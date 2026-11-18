@@ -22,20 +22,36 @@ class PlayerManager {
         "#00FFFF"
     )
 
+    private val spawnPositions = listOf(
+        Pair(-5f, -2f),
+        Pair(0f, -2f),
+        Pair(5f, -2f),
+        Pair(-5f, 2f),
+        Pair(0f, 2f),
+        Pair(5f, 2f)
+    )
+
     @Synchronized
     fun addPlayer(name: String): Player {
         val usedColors = players.values.map { it.color }
 
-        val color = availableColors.firstOrNull {
+        val colorIndex = availableColors.indexOfFirst {
             it !in usedColors
-        } ?: throw IllegalStateException("No free player colors")
+        }
+
+        if (colorIndex == -1) {
+            throw IllegalStateException("No free player colors")
+        }
+
+        val color = availableColors[colorIndex]
+        val spawnPosition = spawnPositions[colorIndex]
 
         val player = Player(
             id = UUID.randomUUID(),
             name = name,
             color = color,
-            x = 0f,
-            y = 0f
+            x = spawnPosition.first,
+            y = spawnPosition.second
         )
 
         players[player.id] = player
@@ -43,6 +59,7 @@ class PlayerManager {
         return player
     }
 
+    @Synchronized
     fun removePlayer(playerId: UUID) {
         players.remove(playerId)
         lastMoveTime.remove(playerId)
@@ -74,8 +91,15 @@ class PlayerManager {
             else -> return null
         }
 
-        player.x = player.x.coerceIn(GameConfig.MAP_MIN, GameConfig.MAP_MAX)
-        player.y = player.y.coerceIn(GameConfig.MAP_MIN, GameConfig.MAP_MAX)
+        player.x = player.x.coerceIn(
+            GameConfig.MAP_MIN,
+            GameConfig.MAP_MAX
+        )
+
+        player.y = player.y.coerceIn(
+            GameConfig.MAP_MIN,
+            GameConfig.MAP_MAX
+        )
 
         lastMoveTime[playerId] = currentTime
 
