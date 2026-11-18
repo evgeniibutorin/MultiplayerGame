@@ -34,6 +34,7 @@ public class ChatManager : MonoBehaviour
     private void Start()
     {
         chatSendButton.onClick.AddListener(SendChatMessage);
+        chatInputField.onSubmit.AddListener(OnChatMessageSubmitted);
     }
 
     private void SendChatMessage()
@@ -74,6 +75,11 @@ public class ChatManager : MonoBehaviour
             "Chat message received: " +
             message.name + ": " + message.message
         );
+    }
+
+    private void OnChatMessageSubmitted(string value)
+    {
+        SendChatMessage();
     }
 
     private void ShowChatBubble(
