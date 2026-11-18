@@ -10,6 +10,11 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 jobs:
   server-tests:
     name: Build and Test Server
@@ -21,10 +26,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
@@ -32,3 +37,10 @@ jobs:
 
       - name: Build and run tests
         run: mvn -B clean verify
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: (!cancelled())
+        with:
+          files: Server/MultiplayerGameServer/target/surefire-reports/TEST-*.xml
+          check_name: Server Test Results
